@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.IdentityModel.Tokens;
 using TestWebApplication.Dtos.Product;
 using TestWebApplication.Entities;
 using TestWebApplication.Repositories.Interface;
@@ -16,9 +17,13 @@ namespace TestWebApplication.Services
             _productRepository = productRepository;
         }
 
-        public async Task<List<ProductDto>> GetAllProductsAsync(string searchText, int pageIndex, int pageSize)
+        public async Task<List<ProductDto>> GetAllProductsAsync(string searchText, string Category, int pageIndex, int pageSize)
         {
             var paginationResponse = await _productRepository.GetAllAsync(p => p.Name.Contains(searchText), p => p.OrderByDescending(p => p.Name), pageIndex, pageSize);
+            if (!Category.IsNullOrEmpty())
+            {
+                return _mapper.Map<List<ProductDto>>(paginationResponse.Items.Where(p => p.Category == Category));
+            }
             return _mapper.Map<List<ProductDto>>(paginationResponse.Items);
         }
 
